@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from nuscenes.nuscenes import NuScenes
 
-from nuscenes_frame_io.frame_io import get_frame
+from src.nuscenes_frame_io.frame_io import get_frame
 
 # =========================
 # CONFIG

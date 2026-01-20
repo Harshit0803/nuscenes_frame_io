@@ -2,7 +2,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from nuscenes.nuscenes import NuScenes
-from nuscenes_frame_io.frame_io import get_frame
+from src.nuscenes_frame_io.frame_io import get_frame
 
 DATAROOT = "/home/harshit/nuScenes_data"
 VERSION = "v1.0-mini"

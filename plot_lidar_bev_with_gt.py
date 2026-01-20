@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
 from nuscenes.nuscenes import NuScenes
 
-from nuscenes_frame_io.frame_io import get_frame
+from src.nuscenes_frame_io.frame_io import get_frame
 
 DATAROOT = "/home/harshit/nuScenes_data"
 VERSION = "v1.0-mini"

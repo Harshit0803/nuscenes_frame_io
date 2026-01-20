@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 import numpy as np
 import matplotlib.pyplot as plt
 from nuscenes.nuscenes import NuScenes
-from nuscenes_frame_io.frame_io import get_frame
+from src.nuscenes_frame_io.frame_io import get_frame
 
 # =========================
 # CONFIG
