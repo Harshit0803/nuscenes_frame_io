@@ -19,7 +19,7 @@ def invert_T(T):
     t = T[:3, 3]
     Ti = np.eye(4, dtype=np.float64)
     Ti[:3, :3] = R.T
-    Ti[:3, 3] = -R.T @ t
+    Ti[:3, 3] = -R.T @ t #-np.dot(R.T, t)
     return Ti
 
 

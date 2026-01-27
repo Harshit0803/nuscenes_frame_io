@@ -9,10 +9,11 @@ VERSION = "v1.0-mini"
 
 nusc = NuScenes(version=VERSION, dataroot=DATAROOT, verbose=True)
 sample_token = nusc.sample[0]["token"]
-
+print(sample_token)
 frame = get_frame(nusc, sample_token)
 
 print("sample:", frame["sample_token"])
 print("lidar path:", frame["lidar"]["path"])
 print("cams:", list(frame["cameras"].keys()))
+print("cams K:", frame["cameras"]["CAM_FRONT"]["K"])
 print("anns:", len(frame["anns"]))

@@ -1,4 +1,5 @@
 import os
+from random import sample
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -26,6 +27,13 @@ def load_lidar_xyz(bin_path: str) -> np.ndarray:
 def main():
     nusc = NuScenes(version=VERSION, dataroot=DATAROOT, verbose=True)
     sample_token = nusc.sample[SAMPLE_INDEX]["token"]
+    sample = nusc.get("sample", sample_token)
+    for ann_token in sample["anns"]:
+        ann = nusc.get("sample_annotation", ann_token)
+        print(ann["category_name"], ann["num_lidar_pts"])
+
+
+    # print(sample_token["num_lidar_pts"])
     frame = get_frame(nusc, sample_token)
 
     pts = load_lidar_xyz(frame["lidar"]["path"])
