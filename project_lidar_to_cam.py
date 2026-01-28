@@ -21,6 +21,60 @@ CAM_NAME = "CAM_FRONT"   # try CAM_FRONT_LEFT, CAM_FRONT_RIGHT
 def load_lidar_xyz(bin_path: str) -> np.ndarray:
     return np.fromfile(bin_path, dtype=np.float32).reshape(-1, 5)[:, :3]
 
+def transform_points_h(pts_xyz: np.ndarray, T: np.ndarray) -> np.ndarray:
+    """Apply 4x4 transform to Nx3 points. Returns Nx3."""
+    pts_xyz = np.asarray(pts_xyz, dtype=np.float64)
+    ones = np.ones((pts_xyz.shape[0], 1), dtype=np.float64)
+    pts_h = np.hstack([pts_xyz, ones])  # (N,4)
+    out = (T @ pts_h.T).T               # (N,4)
+    return out[:, :3]
+
+
+def project_cam(K: np.ndarray, pts_c: np.ndarray):
+    """
+    Project Nx3 camera-frame points to pixel coords.
+    Returns (u,v,z) where u,v are float arrays and z is depth.
+    """
+    pts_c = np.asarray(pts_c, dtype=np.float64)
+    z = pts_c[:, 2]
+    proj = (K @ pts_c.T).T  # (N,3)
+    u = proj[:, 0] / proj[:, 2]
+    v = proj[:, 1] / proj[:, 2]
+    return u, v, z
+
+
+def box_corners_in_cam_from_global_box(box_g, T_cam_from_global: np.ndarray) -> np.ndarray:
+    """
+    box_g is a nuScenes Box in GLOBAL frame.
+    Returns 8 corners in CAMERA frame as (8,3).
+    """
+    # Box corners in GLOBAL frame: (3,8)
+    corners_g = box_g.corners().T  # -> (8,3)
+
+    # Transform corners to camera frame
+    corners_c = transform_points_h(corners_g, T_cam_from_global)  # (8,3)
+    return corners_c
+
+
+def draw_3d_box_2d(img: np.ndarray, corners_uv: np.ndarray, color=(0, 255, 0), thickness=2):
+    """
+    Draw projected 3D box (8 corners) on image.
+    corners_uv: (8,2) in the same order as nuScenes Box.corners() provides.
+    """
+    c = corners_uv.astype(int)
+
+    # nuScenes corners ordering (standard):
+    # 0-3 are one face, 4-7 are the opposite face.
+    # We'll draw edges:
+    edges = [
+        (0, 1), (1, 2), (2, 3), (3, 0),  # bottom rectangle
+        (4, 5), (5, 6), (6, 7), (7, 4),  # top rectangle
+        (0, 4), (1, 5), (2, 6), (3, 7),  # verticals
+    ]
+
+    for i, j in edges:
+        cv2.line(img, tuple(c[i]), tuple(c[j]), color, thickness, lineType=cv2.LINE_AA)
+
 
 def main():
     nusc = NuScenes(version=VERSION, dataroot=DATAROOT, verbose=True)
@@ -79,7 +133,41 @@ def main():
         # BGR: draw bluish points with intensity by depth
         out = cv2.circle(out, (int(px), int(py)), 1, (int(c), 0, 255 - int(c)), -1)
 
-    cv2.imshow(f"LiDAR -> {CAM_NAME} projection", out)
+    drawn = 0
+    skipped_behind = 0
+    skipped_off = 0
+
+    for ann in frame["anns"]:
+        ann_token = ann["token"]
+        box_g = nusc.get_box(ann_token)  # GLOBAL frame Box
+
+        # Corners in camera frame
+        corners_c = box_corners_in_cam_from_global_box(box_g, T_cam_from_global)  # (8,3)
+
+        # If most corners are behind camera, skip (z<=0)
+        zc = corners_c[:, 2]
+        if np.count_nonzero(zc > 0.5) < 6:
+            skipped_behind += 1
+            continue
+
+        u_b, v_b, z_b = project_cam(K, corners_c)
+        corners_uv = np.stack([u_b, v_b], axis=1)  # (8,2)
+
+        # Skip if completely outside image (optional; keeps view clean)
+        if (
+            np.all(corners_uv[:, 0] < 0) or np.all(corners_uv[:, 0] >= W) or
+            np.all(corners_uv[:, 1] < 0) or np.all(corners_uv[:, 1] >= H)
+        ):
+            skipped_off += 1
+            continue
+
+        draw_3d_box_2d(out, corners_uv, color=(0, 255, 0), thickness=2)
+        drawn += 1
+
+    print(f"Projected LiDAR points: {len(u)}")
+    print(f"Drew GT boxes: {drawn} (skipped behind: {skipped_behind}, skipped offscreen: {skipped_off})")
+
+    cv2.imshow(f"LiDAR -> {CAM_NAME} + GT 3D boxes", out)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
