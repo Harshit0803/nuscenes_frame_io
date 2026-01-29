@@ -2,6 +2,16 @@ import numpy as np
 from pyquaternion import Quaternion # type: ignore
 
 
+def quat_to_yaw(qw: float, qx: float, qy: float, qz: float) -> float:
+    """
+    Extract yaw (rotation about +z) from quaternion [w, x, y, z].
+    Ego frame convention: x forward, y left.
+    """
+    siny_cosp = 2.0 * (qw * qz + qx * qy)
+    cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz)
+    return float(np.arctan2(siny_cosp, cosy_cosp))
+
+
 def quat_trans_to_T(q, t): 
     """q: [w,x,y,z] or Quaternion ; t: [x,y,z] -> 4x4"""
     if not isinstance(q, Quaternion):

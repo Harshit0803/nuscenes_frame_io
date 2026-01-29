@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nuscenes-frame-io"
+version = "0.0.1"
+description = "nuScenes frame loading and coordinate transforms"
+requires-python = ">=3.8"
+
+dependencies = [
+    "numpy",
+    "pyquaternion",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}

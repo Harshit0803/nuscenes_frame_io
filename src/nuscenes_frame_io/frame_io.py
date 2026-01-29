@@ -13,11 +13,31 @@ def _get_T_ego_from_sensor(nusc: NuScenes, sample_data_token: str):
     T = quat_trans_to_T(cs["rotation"], cs["translation"])
     return T, cs
 
-def _get_T_global_from_ego(nusc: NuScenes, sample_data_token: str):
+def get_T_global_from_ego(nusc: NuScenes, sample_data_token: str):
+    """Get ego pose as 4x4 transformation matrix."""
     sd = nusc.get("sample_data", sample_data_token)
     ep = nusc.get("ego_pose", sd["ego_pose_token"])
     T = quat_trans_to_T(ep["rotation"], ep["translation"])
     return T, ep
+
+
+def get_ego_pose(nusc: NuScenes, sample_data_token: str):
+    """
+    Get ego pose with map name.
+
+    Returns:
+        T_global_from_ego: (4,4) transformation matrix
+        ego_pose: dict with 'translation' and 'rotation'
+        map_name: str, e.g. 'boston-seaport'
+    """
+    T, ep = get_T_global_from_ego(nusc, sample_data_token)
+
+    sd = nusc.get("sample_data", sample_data_token)
+    sample = nusc.get("sample", sd["sample_token"])
+    scene = nusc.get("scene", sample["scene_token"])
+    log = nusc.get("log", scene["log_token"])
+
+    return T, ep, log["location"]
 
 def get_frame(nusc: NuScenes, sample_token: str, cam_names=None):
     """
@@ -41,7 +61,7 @@ def get_frame(nusc: NuScenes, sample_token: str, cam_names=None):
     # -------- LiDAR TOP --------
     lidar_token = sample["data"]["LIDAR_TOP"]
     T_ego_from_lidar, _ = _get_T_ego_from_sensor(nusc, lidar_token)
-    T_global_from_ego, _ = _get_T_global_from_ego(nusc, lidar_token)
+    T_global_from_ego, _ = get_T_global_from_ego(nusc, lidar_token)
     T_global_from_lidar = T_global_from_ego @ T_ego_from_lidar
 
     frame["lidar"] = {
@@ -57,7 +77,7 @@ def get_frame(nusc: NuScenes, sample_token: str, cam_names=None):
             continue
         cam_token = sample["data"][cam]
         T_ego_from_cam, cs = _get_T_ego_from_sensor(nusc, cam_token)
-        T_global_from_ego, _ = _get_T_global_from_ego(nusc, cam_token)
+        T_global_from_ego, _ = get_T_global_from_ego(nusc, cam_token)
         T_global_from_cam = T_global_from_ego @ T_ego_from_cam
 
         K = np.array(cs["camera_intrinsic"], dtype=np.float64) if cs.get("camera_intrinsic") else None
