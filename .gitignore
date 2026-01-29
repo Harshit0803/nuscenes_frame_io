@@ -18,3 +18,8 @@ venv/
 .vscode/
 *.swp
 
+# mypy
+.mypy_cache/
+
+# Output files
+*.png
