@@ -4,9 +4,34 @@ A utility library for working with nuScenes dataset frames, providing easy acces
 
 ## Installation
 
+### Create conda environment
+
+```bash
+conda create -n adas python=3.10
+conda activate adas
+```
+
+### Install dependencies
+
+```bash
+pip install "numpy<2.0.0"
+pip install nuscenes-devkit
+pip install opencv-python
+pip install matplotlib
+pip install scipy
+pip install pyquaternion
+pip install shapely
+```
+
+### Install this package
+
 ```bash
 pip install -e .
 ```
+
+### Download nuScenes dataset
+
+Download the [nuScenes dataset](https://www.nuscenes.org/nuscenes#download) (mini or full) and extract to a directory (e.g., `/path/to/nuScenes`).
 
 ## Usage
 
