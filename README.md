@@ -116,6 +116,10 @@ frame = {
 
 ## Examples
 
+### LiDAR to Camera Projection
+
+![LiDAR -> CAM_FRONT projection](<LiDAR_2_CAM_FRONT-projection.png>)
+
 ### LiDAR to Camera Projection with GT 3D Boxes
 
 ![LiDAR to camera projection with GT boxes](lidar_2_cam_with_gt_box.png)
@@ -123,6 +127,10 @@ frame = {
 ### LiDAR Top-Down View
 
 ![LiDAR top-down view](<Lidar top.png>)
+
+### LiDAR BEV + GT Boxes
+
+![LiDAR BEV + GT Boxes](Figure_1.png)
 
 <!--
 NOTES:
