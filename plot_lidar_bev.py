@@ -14,8 +14,7 @@ from src.nuscenes_frame_io.frame_io import get_frame
 # =========================
 DATAROOT = "/home/harshit/nuScenes_data"
 VERSION = "v1.0-mini"
-SAMPLE_INDEX = 0  # change to view different frames
-
+SAMPLE_INDEX = 0  
 
 def load_lidar_xyz(bin_path: str) -> np.ndarray:
     """nuScenes lidar .pcd.bin is float32 with 5 dims: x,y,z,intensity,ring_index."""

@@ -15,7 +15,7 @@ from src.nuscenes_frame_io.frame_io import get_frame
 DATAROOT = "/home/harshit/nuScenes_data"
 VERSION = "v1.0-mini"
 SAMPLE_INDEX = 0
-CAM_NAME = "CAM_FRONT"   # try CAM_FRONT_LEFT, CAM_FRONT_RIGHT
+CAM_NAME = "CAM_FRONT"   
 
 
 def load_lidar_xyz(bin_path: str) -> np.ndarray:
